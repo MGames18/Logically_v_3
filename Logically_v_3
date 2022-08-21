@@ -1,0 +1,774 @@
+Ausgang[] ausgang = new Ausgang[0];
+Eingang[] eingang = new Eingang[0];
+Gatter[] gatter = new Gatter[0];
+Not[] nicht = new Not[0];
+Verbindung[] verbindung = new Verbindung[0];
+
+boolean verbindungsMod = false;
+boolean bearbeitungsMod = true;
+boolean bewegungsMod = false;
+int x = 0;
+
+String[] komponenten = {"Input", "Output", "Not", "And", "Or", "Nand", "Nor", "Xor", "Xnor"};
+
+
+void setup() {
+  background(255);
+  size(1940, 1080);
+  surface.setTitle("Logically v.3 by Marian Fischer");
+}
+
+void draw() {
+  
+  background(255);
+  
+  int spalte = 1;
+  int zeile = 1;
+  
+  int xPosition;
+  int yPosition;
+  
+  fill(0);
+  stroke(0);
+  strokeWeight(1);
+  
+  for(int index = 0; index < 4187; index++) {
+    
+    xPosition = 320 + 20 * spalte;
+    yPosition = 20 * zeile;
+    
+    ellipse(xPosition, yPosition, 1, 1);
+    
+    if(spalte == 79) {
+      zeile++;
+      spalte = 1;
+    } else {
+      spalte++;
+    }
+  }
+  
+  for(int index = 0; index < eingang.length; index++) {
+    eingang[index].Operation();
+    eingang[index].Zeichnen();
+  }
+  
+  for(int index = 0; index < ausgang.length; index++) {
+    ausgang[index].Operation();
+    ausgang[index].Zeichnen();
+  }
+  
+  for(int index = 0; index < nicht.length; index++) {
+    nicht[index].Operation();
+    nicht[index].Zeichnen();
+  }
+  
+  for(int index = 0; index < gatter.length; index++) {
+    gatter[index].Operation();
+    gatter[index].Zeichnen();
+  }
+  
+  for(int index = 0; index < verbindung.length; index++) {
+    verbindung[index].Zeichnen();
+  }
+  
+  fill(255);
+  stroke(0);
+  strokeWeight(2);
+  
+  rect(20, 20, 33, 33);
+  rect(73, 20, 33, 33);
+  
+  PImage cursor = loadImage("cursor.png");
+  image(cursor, 24, 24, 25, 25);
+  
+  PImage cursorHand = loadImage("cursorHand.png");
+  image(cursorHand, 77, 24, 25, 25);
+  
+  line(320, 0, 320, 1080);
+  
+  textSize(40);
+  textAlign(LEFT, CENTER);
+  fill(0);
+  
+  for(int index = 0; index < 9; index++) {
+    text(komponenten[index], 20, 73 + textAscent() / 2 - textAscent() * 0.15 + 60 * index);
+    line(20, 123 + 60 * index, 300, 123 + 60 * index);
+  }
+  
+  if(!verbindungsMod) {
+    for(int index = 0; index < verbindung.length; index++) {
+      if(!verbindung[index].verbunden) {
+        removeIndexVerbindung(index);
+      }
+    }
+  }
+}
+
+void mousePressed() {
+  if(x == 1) {
+    x = 2;
+  }
+  if(mouseX >= 320) {
+    if(bearbeitungsMod) {
+      if(!verbindungsMod) {
+        keinVerbindungsMod();
+      } else {
+        boolean y = false;
+        if(verbindung[verbindung.length - 1].ausgang) {
+          for(int index = gatter.length - 1; index > -1; index--) {
+            if(gatter[index].a & !gatter[index].verbindungA.verbunden & verbindungsMod) {
+              gatter[index].verbindungA = verbindung[verbindung.length - 1];
+              verbindung[verbindung.length - 1].verbunden = true;
+              verbindungsMod = false;
+              y = true;
+            } else if(gatter[index].b & !gatter[index].verbindungB.verbunden & verbindungsMod) {
+              gatter[index].verbindungB = verbindung[verbindung.length - 1];
+              verbindung[verbindung.length - 1].verbunden = true;
+              verbindungsMod = false;
+              y = true;
+            }
+          }
+          for(int index = nicht.length - 1; index > -1; index--) {
+            if(nicht[index].a & !nicht[index].verbindungA.verbunden & verbindungsMod) {
+              nicht[index].verbindungA = verbindung[verbindung.length - 1];
+              verbindung[verbindung.length - 1].verbunden = true;
+              verbindungsMod = false;
+              y = true;
+            }
+          }
+          for(int index = ausgang.length - 1; index > -1; index--) {
+            if(ausgang[index].a & !ausgang[index].verbindungA.verbunden & verbindungsMod) {
+              ausgang[index].verbindungA = verbindung[verbindung.length - 1];
+              verbindung[verbindung.length - 1].verbunden = true;
+              verbindungsMod = false;
+              y = true;
+            }
+          }
+        } else {
+          for(int index = gatter.length - 1; index > -1; index--) {
+            if(gatter[index].c & !gatter[index].verbindungC.verbunden & verbindungsMod) {
+              gatter[index].verbindungC = verbindung[verbindung.length - 1];
+              verbindung[verbindung.length - 1].verbunden = true;
+              verbindungsMod = false;
+              y = true;
+            }
+          }
+          for(int index = nicht.length - 1; index > -1; index--) {
+            if(nicht[index].b & !nicht[index].verbindungB.verbunden & verbindungsMod) {
+              nicht[index].verbindungB = verbindung[verbindung.length - 1];
+              verbindung[verbindung.length - 1].verbunden = true;
+              verbindungsMod = false;
+              y = true;
+            }
+          }
+          for(int index = eingang.length - 1; index > -1; index--) {
+            if(eingang[index].a & !eingang[index].verbindungA.verbunden & verbindungsMod) {
+              eingang[index].verbindungA = verbindung[verbindung.length - 1];
+              verbindung[verbindung.length - 1].verbunden = true;
+              verbindungsMod = false;
+              y = true;
+            }
+          }
+        }
+        if(!y) {
+          verbindungsMod = false;
+          removeIndexVerbindung(verbindung.length - 1);
+          keinVerbindungsMod();
+        }
+      }
+    } else {
+      for(int index = 0; index < eingang.length; index++) {
+        eingang[index].mousePressed();
+      }
+    }
+  } else {
+    removeCurrentComponent();
+    verbindungsMod = false;
+    if(mouseX >= 20 & mouseY >= 20 & mouseX <= 53 & mouseY <= 53) {
+      bearbeitungsMod = true;
+      cursor(ARROW);
+    }
+    if(mouseX >= 73 & mouseY >= 20 & mouseX <= 106 & mouseY <= 53) {
+      bearbeitungsMod = false;
+      cursor(HAND);
+    } 
+    if(bearbeitungsMod) {
+      for(int index = 0; index < 9; index++) {
+        if(mouseY >= 73 + 60 * index & mouseY <= 123 + 60 * index) {
+          if(index == 0) {
+            addIndexEingang();
+            eingang[eingang.length - 1] = new Eingang();
+            eingang[eingang.length - 1].ausgewählt = true;
+            eingang[eingang.length - 1].mausX = 20;
+            eingang[eingang.length - 1].mausY = 20;
+            bewegungsMod = true;
+            x = 1;
+          }
+          if(index == 1) {
+            addIndexAusgang();
+            ausgang[ausgang.length - 1] = new Ausgang();
+            ausgang[ausgang.length - 1].ausgewählt = true;
+            ausgang[ausgang.length - 1].mausX = 20;
+            ausgang[ausgang.length - 1].mausY = 20;
+            bewegungsMod = true;
+            x = 1;
+          }
+          if(index == 2) {
+            addIndexNicht();
+            nicht[nicht.length - 1] = new Not();
+            nicht[nicht.length - 1].ausgewählt = true;
+            nicht[nicht.length - 1].mausX = 20;
+            nicht[nicht.length - 1].mausY = 20;
+            bewegungsMod = true;
+            x = 1;
+          }
+          if(index > 2) {
+            addIndexGatter();
+            gatter[gatter.length - 1] = new Gatter();
+            gatter[gatter.length - 1].ausgewählt  = true;
+            gatter[gatter.length - 1].welchesGatter = komponenten[index];
+            gatter[gatter.length - 1].mausX = 30;
+            gatter[gatter.length - 1].mausY = 40;
+            bewegungsMod = true; 
+            x = 1;
+          }
+        }
+      }
+    }
+  }
+  if(x == 2) {
+    for(int index = 0; index < eingang.length; index++) {
+      eingang[index].mousePressed();
+    }
+    for(int index = 0; index < ausgang.length; index++) {
+      ausgang[index].mousePressed();
+    }
+    for(int index = 0; index < nicht.length; index++) {
+      nicht[index].mousePressed();
+    }
+    for(int index = 0; index < gatter.length; index++) {
+      gatter[index].mousePressed();
+    }
+    bewegungsMod = false;
+    x = 0;
+  }
+}
+
+void keyPressed() {
+  if(keyCode == DELETE) {
+    for(int index = 0; index < eingang.length; index++) {
+      if(eingang[index].ausgewählt) {
+        removeVerbindungEingang(eingang[index]);
+        removeIndexEingang(index);
+        bewegungsMod = false;
+        x = 0;
+      }
+    }
+    for(int index = 0; index < ausgang.length; index++) {
+      if(ausgang[index].ausgewählt) {
+        removeVerbindungAusgang(ausgang[index]);
+        removeIndexAusgang(index);
+        bewegungsMod = false;
+        x = 0;
+      }
+    }
+    for(int index = 0; index < nicht.length; index++) {
+      if(nicht[index].ausgewählt) {
+        removeVerbindungNicht(nicht[index]);
+        removeIndexNicht(index);
+        bewegungsMod = false;
+        x = 0;
+      }
+    }
+    for(int index = 0; index < gatter.length; index++) {
+      if(gatter[index].ausgewählt) {
+        removeVerbindungGatter(gatter[index]);
+        removeIndexGatter(index);
+        bewegungsMod = false;
+        x = 0;
+      }
+    }
+  }
+}
+
+void addIndexEingang() {
+  eingang = (Eingang[]) expand(eingang, eingang.length + 1);
+}
+        
+void addIndexAusgang() {
+  ausgang = (Ausgang[]) expand(ausgang, ausgang.length + 1);
+}
+
+void addIndexNicht() {
+  nicht = (Not[]) expand(nicht, nicht.length + 1);
+}
+
+void addIndexGatter() {
+  gatter = (Gatter[]) expand(gatter, gatter.length + 1);
+}
+
+void addIndexVerbindung() { 
+  verbindung = (Verbindung[]) expand(verbindung, verbindung.length + 1);
+  verbindung[verbindung.length - 1] = new Verbindung();
+}
+
+void removeIndexEingang(int index) {
+  Eingang[] eingang1 = (Eingang[]) subset(eingang, 0, index);
+  Eingang[] eingang2 = (Eingang[]) subset(eingang, index + 1, eingang.length - (index + 1));
+  eingang = (Eingang[]) concat(eingang1, eingang2);
+}
+  
+void removeIndexAusgang(int index) {
+  Ausgang[] ausgang1 = (Ausgang[]) subset(ausgang, 0, index);
+  Ausgang[] ausgang2 = (Ausgang[]) subset(ausgang, index + 1, ausgang.length - (index + 1));
+  ausgang = (Ausgang[]) concat(ausgang1, ausgang2);
+}
+
+void removeIndexNicht(int index) {
+  Not[] nicht1 = (Not[]) subset(nicht, 0, index);
+  Not[] nicht2 = (Not[]) subset(nicht, index + 1, nicht.length - (index + 1));
+  nicht = (Not[]) concat(nicht1, nicht2);
+}
+
+void removeIndexGatter(int index) {
+  Gatter[] gatter1 = (Gatter[]) subset(gatter, 0, index);
+  Gatter[] gatter2 = (Gatter[]) subset(gatter, index + 1, gatter.length - (index + 1));
+  gatter = (Gatter[]) concat(gatter1, gatter2);
+}
+
+void removeIndexVerbindung(int index) {
+  Verbindung[] verbindung1 = (Verbindung[]) subset(verbindung, 0, index);
+  Verbindung[] verbindung2 = (Verbindung[]) subset(verbindung, index + 1, verbindung.length - (index + 1));
+  verbindung = (Verbindung[]) concat(verbindung1, verbindung2);
+}
+      
+void removeCurrentComponent() {
+  for(int index = 0; index < eingang.length; index++) {
+    if(eingang[index].ausgewählt) {
+      removeVerbindungEingang(eingang[index]);
+      removeIndexEingang(index);
+    }
+  }
+  for(int index = 0; index < ausgang.length; index++) {
+    if(ausgang[index].ausgewählt) {
+      removeVerbindungAusgang(ausgang[index]);
+      removeIndexAusgang(index);
+    }
+  }
+  for(int index = 0; index < nicht.length; index++) {
+    if(nicht[index].ausgewählt) {
+      removeVerbindungNicht(nicht[index]);
+      removeIndexNicht(index);
+    }
+  }
+  for(int index = 0; index < gatter.length; index++) {
+    if(gatter[index].ausgewählt) {
+      removeVerbindungGatter(gatter[index]);
+      removeIndexGatter(index);
+    }
+  }
+}
+
+void direktVerbindungEingang(Eingang akteur) {
+  for(int index = gatter.length - 1; index > -1; index--) {
+    if(gatter[index].xpos - 20 == akteur.xpos + 40 & gatter[index].ypos + 20 == akteur.ypos + 20 & !gatter[index].verbindungA.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      gatter[index].verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    } else if(gatter[index].xpos - 20 == akteur.xpos + 40 & gatter[index].ypos + 60 == akteur.ypos + 20 & !gatter[index].verbindungB.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      gatter[index].verbindungB = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = nicht.length - 1; index > -1; index--) {
+    if(nicht[index].xpos == akteur.xpos + 40 & nicht[index].ypos + 20 == akteur.ypos + 20 & !nicht[index].verbindungA.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      nicht[index].verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = ausgang.length - 1; index > -1; index--) {
+    if(ausgang[index].xpos == akteur.xpos + 40 & ausgang[index].ypos + 20 == akteur.ypos + 20 & !ausgang[index].verbindungA.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      ausgang[index].verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+}
+
+void direktVerbindungAusgang(Ausgang akteur) {
+  for(int index = gatter.length - 1; index > -1; index--) {
+    if(gatter[index].xpos + 80 == akteur.xpos & gatter[index].ypos + 40 == akteur.ypos + 20 & !gatter[index].verbindungC.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      gatter[index].verbindungC = verbindung[verbindung.length - 1];
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = nicht.length - 1; index > -1; index--) {
+    if(nicht[index].xpos + 40 == akteur.xpos & nicht[index].ypos + 20 == akteur.ypos + 20 & !nicht[index].verbindungB.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      nicht[index].verbindungB = verbindung[verbindung.length - 1];
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = eingang.length - 1; index > -1; index--) {
+    if(eingang[index].xpos + 40 == akteur.xpos & eingang[index].ypos + 20 == akteur.ypos + 20 & !eingang[index].verbindungA.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      eingang[index].verbindungA = verbindung[verbindung.length - 1];
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+}
+
+void direktVerbindungNicht(Not akteur) {
+  for(int index = gatter.length - 1; index > -1; index--) {
+    if(gatter[index].xpos + 80 == akteur.xpos & gatter[index].ypos + 40 == akteur.ypos + 20 & !gatter[index].verbindungC.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      gatter[index].verbindungC = verbindung[verbindung.length - 1];
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = nicht.length - 1; index > -1; index--) {
+    if(nicht[index].xpos + 40 == akteur.xpos & nicht[index].ypos + 20 == akteur.ypos + 20 & !nicht[index].verbindungB.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      nicht[index].verbindungB = verbindung[verbindung.length - 1];
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = eingang.length - 1; index > -1; index--) {
+    if(eingang[index].xpos + 40 == akteur.xpos & eingang[index].ypos + 20 == akteur.ypos + 20 & !eingang[index].verbindungA.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      eingang[index].verbindungA = verbindung[verbindung.length - 1];
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = gatter.length - 1; index > -1; index--) {
+    if(gatter[index].xpos - 20 == akteur.xpos + 40 & gatter[index].ypos + 20 == akteur.ypos + 20 & !gatter[index].verbindungA.verbunden& !akteur.verbindungB.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungB = verbindung[verbindung.length - 1];
+      gatter[index].verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    } else if(gatter[index].xpos - 20 == akteur.xpos + 40 & gatter[index].ypos + 60 == akteur.ypos + 20 & !gatter[index].verbindungB.verbunden & !akteur.verbindungB.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungB = verbindung[verbindung.length - 1];
+      gatter[index].verbindungB = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = nicht.length - 1; index > -1; index--) {
+    if(nicht[index].xpos == akteur.xpos + 40 & nicht[index].ypos + 20 == akteur.ypos + 20 & !nicht[index].verbindungA.verbunden & !akteur.verbindungB.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungB = verbindung[verbindung.length - 1];
+      nicht[index].verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = ausgang.length - 1; index > -1; index--) {
+    if(ausgang[index].xpos == akteur.xpos + 40 & ausgang[index].ypos + 20 == akteur.ypos + 20 & !ausgang[index].verbindungA.verbunden & !akteur.verbindungB.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungB = verbindung[verbindung.length - 1];
+      ausgang[index].verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+}
+
+void direktVerbindungGatter(Gatter akteur) {
+  for(int index = gatter.length - 1; index > -1; index--) {
+    if(gatter[index].xpos + 80 == akteur.xpos - 20 & gatter[index].ypos + 40 == akteur.ypos + 20 & !gatter[index].verbindungC.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      gatter[index].verbindungC = verbindung[verbindung.length - 1];
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    } else if(gatter[index].xpos + 80 == akteur.xpos - 20 & gatter[index].ypos + 40 == akteur.ypos + 60 & !gatter[index].verbindungC.verbunden & !akteur.verbindungB.verbunden) {
+      addIndexVerbindung();
+      gatter[index].verbindungC = verbindung[verbindung.length - 1];
+      akteur.verbindungB = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = nicht.length - 1; index > -1; index--) {
+    if(nicht[index].xpos + 40 == akteur.xpos - 20 & nicht[index].ypos + 20 == akteur.ypos + 20 & !nicht[index].verbindungB.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      nicht[index].verbindungB = verbindung[verbindung.length - 1];
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    } else if(nicht[index].xpos + 40 == akteur.xpos - 20 & nicht[index].ypos + 20 == akteur.ypos + 60 & !nicht[index].verbindungB.verbunden & !akteur.verbindungB.verbunden) {
+      addIndexVerbindung();
+      nicht[index].verbindungB = verbindung[verbindung.length - 1];
+      akteur.verbindungB = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = eingang.length - 1; index > -1; index--) {
+    if(eingang[index].xpos + 40 == akteur.xpos - 20 & eingang[index].ypos + 20 == akteur.ypos + 20 & !eingang[index].verbindungA.verbunden & !akteur.verbindungA.verbunden) {
+      addIndexVerbindung();
+      eingang[index].verbindungA = verbindung[verbindung.length - 1];
+      akteur.verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    } else if(eingang[index].xpos + 40 == akteur.xpos - 20 & eingang[index].ypos + 20 == akteur.ypos + 60 & !eingang[index].verbindungA.verbunden & !akteur.verbindungB.verbunden) {
+      addIndexVerbindung();
+      verbindung[verbindung.length - 1] = new Verbindung();
+      eingang[index].verbindungA = verbindung[verbindung.length - 1];
+      akteur.verbindungB = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = gatter.length - 1; index > -1; index--) {
+    if(gatter[index].xpos - 20 == akteur.xpos + 80 & gatter[index].ypos + 20 == akteur.ypos + 40 & !gatter[index].verbindungA.verbunden & !akteur.verbindungC.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungC = verbindung[verbindung.length - 1];
+      gatter[index].verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    } else if(gatter[index].xpos - 20 == akteur.xpos + 80 & gatter[index].ypos + 60 == akteur.ypos + 40 & !gatter[index].verbindungB.verbunden & !akteur.verbindungC.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungC = verbindung[verbindung.length - 1];
+      gatter[index].verbindungB = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = nicht.length - 1; index > -1; index--) {
+    if(nicht[index].xpos == akteur.xpos + 80 & nicht[index].ypos + 20 == akteur.ypos + 20 & !nicht[index].verbindungA.verbunden & !akteur.verbindungC.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungC = verbindung[verbindung.length - 1];
+      nicht[index].verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+  for(int index = ausgang.length - 1; index > -1; index--) {
+    if(ausgang[index].xpos == akteur.xpos + 80 & ausgang[index].ypos + 20 == akteur.ypos + 40 & !ausgang[index].verbindungA.verbunden & !akteur.verbindungC.verbunden) {
+      addIndexVerbindung();
+      akteur.verbindungC = verbindung[verbindung.length - 1];
+      ausgang[index].verbindungA = verbindung[verbindung.length - 1];
+      verbindung[verbindung.length - 1].verbunden = true;
+    }
+  }
+}
+
+void keinVerbindungsMod() {
+  for(int index = gatter.length - 1; index > -1; index--) {
+    if(!bewegungsMod & !verbindungsMod) {
+      if(gatter[index].a & !gatter[index].verbindungA.verbunden) {
+        addIndexVerbindung();
+        verbindung[verbindung.length - 1].ausgang = false;
+        gatter[index].verbindungA = verbindung[verbindung.length - 1];
+        verbindungsMod = true;
+      } else if(gatter[index].b & !gatter[index].verbindungB.verbunden) {
+        addIndexVerbindung();
+        verbindung[verbindung.length - 1].ausgang = false;
+        gatter[index].verbindungB = verbindung[verbindung.length - 1];
+        verbindungsMod = true;
+      } else if(gatter[index].c & !gatter[index].verbindungC.verbunden) {
+        addIndexVerbindung();
+        verbindung[verbindung.length - 1].ausgang = true;
+        gatter[index].verbindungC = verbindung[verbindung.length - 1];
+        verbindungsMod = true;
+      } else {
+        gatter[index].mousePressed();
+      }
+    }
+  }
+  for(int index = nicht.length - 1; index > -1; index--) {
+    if(!bewegungsMod & !verbindungsMod) {
+      if(nicht[index].a & !nicht[index].verbindungA.verbunden) {
+        addIndexVerbindung();
+        verbindung[verbindung.length - 1].ausgang = false;
+        nicht[index].verbindungA = verbindung[verbindung.length - 1];
+        verbindungsMod = true;
+      } else if(nicht[index].b & !nicht[index].verbindungB.verbunden) {
+        addIndexVerbindung();
+        verbindung[verbindung.length - 1].ausgang = true;
+        nicht[index].verbindungB = verbindung[verbindung.length - 1];
+        verbindungsMod = true;
+      } else {
+        nicht[index].mousePressed();
+      }
+    }
+  }
+  for(int index = ausgang.length - 1; index > -1; index--) {
+    if(!bewegungsMod & !verbindungsMod) {   
+      if(ausgang[index].a & !ausgang[index].verbindungA.verbunden) {
+        addIndexVerbindung();
+        verbindung[verbindung.length - 1].ausgang = false;
+        ausgang[index].verbindungA = verbindung[verbindung.length - 1];
+        verbindungsMod = true;
+      } else {
+        ausgang[index].mousePressed();
+      }
+    }
+  }
+  for(int index = eingang.length - 1; index > -1; index--) {
+    if(!bewegungsMod & !verbindungsMod) {
+      if(eingang[index].a & !eingang[index].verbindungA.verbunden) {
+        addIndexVerbindung();
+        verbindung[verbindung.length - 1].ausgang = true;
+        eingang[index].verbindungA = verbindung[verbindung.length - 1];
+        verbindungsMod = true;
+      } else {
+        eingang[index].mousePressed();
+      }
+    }
+  }
+}
+
+void removeVerbindungEingang(Eingang akteur) {
+  for(int index = 0; index < ausgang.length; index++) {
+    if(akteur.verbindungA == ausgang[index].verbindungA) {
+      ausgang[index].verbindungA.verbunden = false;
+    }
+  }
+  
+  for(int index = 0; index < nicht.length; index++) {
+    if(akteur.verbindungA == nicht[index].verbindungA) {
+      nicht[index].verbindungA.verbunden = false;
+    }
+  }
+  
+  for(int index = 0; index < gatter.length; index++) {
+    if(akteur.verbindungA == gatter[index].verbindungA) {
+      gatter[index].verbindungA.verbunden = false;
+    } else if(akteur.verbindungA == gatter[index].verbindungB) {
+      gatter[index].verbindungB.verbunden = false;
+    }
+  }
+  for(int index = 0; index < verbindung.length; index++) {
+    if(akteur.verbindungA == verbindung[index]) {
+      removeIndexVerbindung(index);
+    }
+  }
+}
+
+void removeVerbindungAusgang(Ausgang akteur) {
+  for(int index = 0; index < eingang.length; index++) {
+    if(akteur.verbindungA == eingang[index].verbindungA) {
+      eingang[index].verbindungA.verbunden = false;
+    }
+  }
+  for(int index = 0; index < nicht.length; index++) {
+    if(akteur.verbindungA == nicht[index].verbindungB) {
+      nicht[index].verbindungB.verbunden = false;
+    }
+  }
+  for(int index = 0; index < gatter.length; index++) {
+    if(akteur.verbindungA == gatter[index].verbindungC) {
+      gatter[index].verbindungC.verbunden = false;
+    }
+  }
+  for(int index = 0; index < verbindung.length; index++) {
+    if(akteur.verbindungA == verbindung[index]) {
+      removeIndexVerbindung(index);
+    }
+  }
+}
+
+void removeVerbindungNicht(Not akteur) {
+  for(int index = 0; index < eingang.length; index++) {
+    if(akteur.verbindungA == eingang[index].verbindungA) {
+      eingang[index].verbindungA.verbunden = false;
+    }
+  }
+  for(int index = 0; index < nicht.length; index++) {
+    if(akteur.verbindungA == nicht[index].verbindungB) {
+      nicht[index].verbindungB.verbunden = false;
+    }
+  }
+  for(int index = 0; index < gatter.length; index++) {
+    if(akteur.verbindungA == gatter[index].verbindungC) {
+      gatter[index].verbindungC.verbunden = false;
+    }
+  }
+  for(int index = 0; index < ausgang.length; index++) {
+    if(akteur.verbindungB == ausgang[index].verbindungA) {
+      ausgang[index].verbindungA.verbunden = false;
+    }
+  }
+  for(int index = 0; index < nicht.length; index++) {
+    if(akteur.verbindungB == nicht[index].verbindungA) {
+      nicht[index].verbindungA.verbunden = false;
+    }
+  }
+  for(int index = 0; index < gatter.length; index++) {
+    if(akteur.verbindungB == gatter[index].verbindungA) {
+      gatter[index].verbindungA.verbunden = false;
+    } else if(akteur.verbindungB == gatter[index].verbindungB) {
+      gatter[index].verbindungB.verbunden = false;
+    }
+  }
+  for(int index = 0; index < verbindung.length; index++) {
+    if(akteur.verbindungA == verbindung[index]) {
+      removeIndexVerbindung(index);
+    }
+  }
+  for(int index = 0; index < verbindung.length; index++) {
+    if(akteur.verbindungB == verbindung[index]) {
+      removeIndexVerbindung(index);
+    }
+  }
+}
+
+void removeVerbindungGatter(Gatter akteur) {
+  for(int index = 0; index < eingang.length; index++) {
+    if(akteur.verbindungA == eingang[index].verbindungA) {
+      eingang[index].verbindungA.verbunden = false;
+    } else if(akteur.verbindungB == eingang[index].verbindungA) {
+      eingang[index].verbindungA.verbunden = false;
+    }
+  }
+  for(int index = 0; index < nicht.length; index++) {
+    if(akteur.verbindungA == nicht[index].verbindungB) {
+      nicht[index].verbindungB.verbunden = false;
+    } else if(akteur.verbindungB == nicht[index].verbindungB) {
+      nicht[index].verbindungB.verbunden = false;
+    }
+  }
+  for(int index = 0; index < gatter.length; index++) {
+    if(akteur.verbindungA == gatter[index].verbindungC) {
+      gatter[index].verbindungC.verbunden = false;
+    } else if(akteur.verbindungB == gatter[index].verbindungC) {
+      gatter[index].verbindungC.verbunden = false;
+    }
+  }
+  for(int index = 0; index < ausgang.length; index++) {
+    if(akteur.verbindungC == ausgang[index].verbindungA) {
+      ausgang[index].verbindungA.verbunden = false;
+    }
+  }
+  for(int index = 0; index < nicht.length; index++) {
+    if(akteur.verbindungC == nicht[index].verbindungA) {
+      nicht[index].verbindungA.verbunden = false;
+    }
+  }
+  for(int index = 0; index < gatter.length; index++) {
+    if(akteur.verbindungC == gatter[index].verbindungA) {
+      gatter[index].verbindungA.verbunden = false;
+    } else if(akteur.verbindungC == gatter[index].verbindungB) {
+      gatter[index].verbindungB.verbunden = false;
+    }
+  }
+  for(int index = 0; index < verbindung.length; index++) {
+    if(akteur.verbindungA == verbindung[index]) {
+      removeIndexVerbindung(index);
+    }
+  }
+  for(int index = 0; index < verbindung.length; index++) {
+    if(akteur.verbindungB == verbindung[index]) {
+      removeIndexVerbindung(index);
+    }
+  }
+  for(int index = 0; index < verbindung.length; index++) {
+    if(akteur.verbindungC == verbindung[index]) {
+      removeIndexVerbindung(index);
+    }
+  }
+}
